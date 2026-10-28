@@ -17,6 +17,6 @@ jobs:
           for f in probe/out-log.txt; do echo "::notice title=log::$(cat $f | tr '\n' '|')"; done
           git config user.name probe; git config user.email probe@users.noreply.github.com
           git checkout -b probe-results 2>&1 || true
-          rm -f probe/out/vinted_home.html; git add -f probe/out probe/out-log.txt
+          git add -f probe/out probe/out-log.txt
           git commit -qm "probe results" 2>&1 | tail -3
           out=$(git push -f origin HEAD:probe-results 2>&1) || { echo "::error title=push::$(echo "$out" | tr '\n' '|')"; exit 1; }
