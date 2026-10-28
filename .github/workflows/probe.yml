@@ -14,8 +14,9 @@ jobs:
       - run: pip install curl_cffi
       - run: python probe/probe.py | tee probe/out-log.txt
       - run: |
+          for f in probe/out-log.txt; do echo "::notice title=log::$(cat $f | tr '\n' '|')"; done
           git config user.name probe; git config user.email probe@users.noreply.github.com
-          git checkout -b probe-results
+          git checkout -b probe-results 2>&1 || true
           git add -f probe/out probe/out-log.txt
-          git commit -qm "probe results"
-          git push -f origin probe-results
+          git commit -qm "probe results" 2>&1 | tail -3
+          out=$(git push -f origin HEAD:probe-results 2>&1) || { echo "::error title=push::$(echo "$out" | tr '\n' '|')"; exit 1; }
