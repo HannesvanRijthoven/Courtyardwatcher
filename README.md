@@ -78,7 +78,7 @@ Edit `config.json` on GitHub (click it → pencil icon → commit). The main set
 | `graders` | e.g. `["PSA"]`. Empty = all. |
 | `min_grade` | e.g. `9`. `null` = any. |
 | `languages` | e.g. `["English"]` or `["Japanese"]`. Empty = all. |
-| `search_query` / `subject_must_contain` | Change both to watch a different Pokémon, e.g. `"charizard"`. |
+| `pokemon` | Which Pokémon to watch, e.g. `["rayquaza", "charizard", "umbreon"]`. Newly added ones start with only the last 30 min of listings. |
 
 ---
 

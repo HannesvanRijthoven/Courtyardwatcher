@@ -1,8 +1,8 @@
 """
 Courtyard deal watcher.
 
-Polls the Courtyard.io marketplace for new listings matching a search (default:
-Rayquaza), compares each asking price to
+Polls the Courtyard.io marketplace for new listings of the Pokémon in config.json
+("pokemon" list), compares each asking price to
   1. Courtyard's own Fair Market Value (FMV), and
   2. the PriceCharting price for the same card + grade,
 and sends a Telegram alert when the discount is big enough.
@@ -71,8 +71,7 @@ SEEN_KEEP_DAYS = 14
 # --------------------------------------------------------------------------- #
 
 DEFAULT_CONFIG: dict[str, Any] = {
-    "search_query": "rayquaza",
-    "subject_must_contain": "rayquaza",
+    "pokemon": ["rayquaza"],
     "min_discount_pct": 15,
     "alert_when": "either",  # "either" | "both" | "fmv" | "pricecharting"
     "min_fmv_confidence": 0,
@@ -230,9 +229,9 @@ def grade_number(grade: str) -> float | None:
     return float(m.group(1)) if m else None
 
 
-def passes_filters(l: Listing, cfg: dict) -> bool:
-    needle = (cfg.get("subject_must_contain") or "").lower()
-    if needle and needle not in (l.subject or l.title).lower():
+def passes_filters(l: Listing, cfg: dict, needle: str = "") -> bool:
+    needle = _norm(needle).strip()
+    if needle and needle not in _norm(l.subject or l.title):
         return False
     if l.price_usd < (cfg.get("min_price_usd") or 0):
         return False
@@ -425,7 +424,7 @@ def fmt_disc(d: float | None) -> str:
 def build_message(l: Listing, d_fmv: float | None, d_pc: float | None) -> str:
     e = html.escape
     lines = [
-        f"🐉 <b>{e(l.title)}</b>",
+        f"🔥 <b>{e(l.title)}</b>",
         "",
         f"💰 Listed: <b>{fmt_usd(l.price_usd)}</b>",
     ]
@@ -471,26 +470,45 @@ def send_telegram(text: str, image_url: str | None = None) -> None:
 def run(dry_run: bool = False) -> int:
     cfg = load_config()
     state = load_state()
-    first_run = not state
     seen: dict[str, int] = state.get("seen", {})
     pc_cache: dict = state.get("pc_cache", {})
     now = int(time.time())
 
+    names = cfg.get("pokemon") or []
+    if isinstance(names, str):
+        names = [names]
+    if cfg.get("search_query"):  # old single-Pokémon config still works
+        names = [cfg["search_query"]] + list(names)
+    names = list(dict.fromkeys(n.strip() for n in names if n and n.strip()))
+
     session = new_session()
     key = get_algolia_key(session)
-    hits = fetch_listings(session, key, cfg["search_query"])
-    print(f"Fetched {len(hits)} newest listings for {cfg['search_query']!r}")
+    todo: list[tuple[str, dict]] = []
+    for name in names:
+        try:
+            hits = fetch_listings(session, key, name)
+        except Exception as e:  # one failing search shouldn't stop the others
+            print(f"Search for {name!r} failed: {e}", file=sys.stderr)
+            continue
+        print(f"Fetched {len(hits)} newest listings for {name!r}")
+        todo += [(name, h) for h in hits]
 
-    cutoff = now - int(cfg.get("first_run_lookback_minutes", 30)) * 60 if first_run else 0
+    # Pokémon just added to the list (or the very first run): only look at recent
+    # listings, so you don't get flooded with everything already on the market.
+    known = set(state.get("watched", names if state else []))
+    fresh = {n for n in names if n not in known}
+    if fresh:
+        print(f"New in the list, only checking recent listings: {', '.join(sorted(fresh))}")
+    cutoff = now - int(cfg.get("first_run_lookback_minutes", 30)) * 60
     alerts = 0
-    for h in hits:
+    for name, h in todo:
         l = parse_hit(h)
         if not l or l.listing_id in seen:
             continue
         seen[l.listing_id] = now
-        if l.listed_ts and l.listed_ts < cutoff:
-            continue  # first run: don't flood you with old listings
-        if not passes_filters(l, cfg):
+        if name in fresh and l.listed_ts and l.listed_ts < cutoff:
+            continue
+        if not passes_filters(l, cfg, name):
             continue
 
         if cfg.get("use_pricecharting", True):
@@ -524,6 +542,7 @@ def run(dry_run: bool = False) -> int:
     state["pc_cache"] = {
         k: v for k, v in pc_cache.items() if now - v.get("ts", 0) < PC_CACHE_HOURS * 3600
     }
+    state["watched"] = names
     state["last_run"] = now
     save_state(state)
     print(f"Done. {alerts} alert(s).")
