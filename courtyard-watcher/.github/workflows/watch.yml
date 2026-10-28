@@ -1,0 +1,45 @@
+name: Courtyard deal watcher
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"   # every 5 minutes (GitHub may delay runs a few minutes)
+  workflow_dispatch:         # lets you run it by hand from the Actions tab
+
+concurrency:
+  group: watcher
+  cancel-in-progress: false
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      # Remembers which listings were already alerted, between runs
+      - name: Restore state
+        uses: actions/cache/restore@v4
+        with:
+          path: state.json
+          key: watcher-state-${{ github.run_id }}
+          restore-keys: watcher-state-
+
+      - name: Check Courtyard
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python watcher.py
+
+      - name: Save state
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: state.json
+          key: watcher-state-${{ github.run_id }}

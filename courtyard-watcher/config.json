@@ -1,0 +1,26 @@
+{
+  "_help": "Edit these values on GitHub to change what you get alerts for. Keys starting with _ are ignored.",
+
+  "search_query": "rayquaza",
+  "subject_must_contain": "rayquaza",
+
+  "min_discount_pct": 15,
+  "_alert_when_options": "either = FMV or PriceCharting discount is big enough; both = both must be; fmv = only FMV; pricecharting = only PriceCharting",
+  "alert_when": "either",
+
+  "_min_fmv_confidence_help": "Courtyard rates its FMV 1-5. Set to 3 to ignore FMV discounts when Courtyard isn't confident.",
+  "min_fmv_confidence": 0,
+
+  "min_price_usd": 0,
+  "max_price_usd": null,
+
+  "_graders_help": "e.g. [\"PSA\", \"CGC\"]. Empty list = all graders.",
+  "graders": [],
+  "_min_grade_help": "e.g. 9 to only see grade 9 and up. null = any grade.",
+  "min_grade": null,
+  "_languages_help": "e.g. [\"English\"] or [\"Japanese\"]. Empty list = all.",
+  "languages": [],
+
+  "use_pricecharting": true,
+  "first_run_lookback_minutes": 30
+}
