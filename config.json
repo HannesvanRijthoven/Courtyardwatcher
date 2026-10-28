@@ -2,7 +2,7 @@
   "_help": "Edit these values on GitHub to change what you get alerts for. Keys starting with _ are ignored.",
 
   "_pokemon_help": "Add as many as you like, e.g. [\"rayquaza\", \"charizard\", \"umbreon\"]. Matches any card of that Pokémon (Rayquaza V, Mega Rayquaza ex, ...).",
-  "pokemon": ["rayquaza"],
+  "pokemon": ["rayquaza", "lugia", "mewtwo", "mew"],
 
   "min_discount_pct": 15,
   "_alert_when_options": "either = FMV or PriceCharting discount is big enough; both = both must be; fmv = only FMV; pricecharting = only PriceCharting",

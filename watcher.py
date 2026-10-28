@@ -230,8 +230,9 @@ def grade_number(grade: str) -> float | None:
 
 
 def passes_filters(l: Listing, cfg: dict, needle: str = "") -> bool:
-    needle = _norm(needle).strip()
-    if needle and needle not in _norm(l.subject or l.title):
+    needle = " ".join(_norm(needle).split())
+    # whole words only, so "mew" doesn't match "Mewtwo"
+    if needle and not re.search(rf"\b{re.escape(needle)}\b", _norm(l.subject or l.title)):
         return False
     if l.price_usd < (cfg.get("min_price_usd") or 0):
         return False
