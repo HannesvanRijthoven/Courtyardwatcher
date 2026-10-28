@@ -75,7 +75,7 @@ Edit `config.json` on GitHub (click it → pencil icon → commit). The main set
 | `alert_when` | `either` (FMV or PriceCharting), `both`, `fmv` or `pricecharting`. |
 | `min_fmv_confidence` | Courtyard rates its FMV 1–5. `3` ignores shaky FMVs. |
 | `max_price_usd` / `min_price_usd` | Price range, e.g. `500`. `null` = no limit. |
-| `graders` | e.g. `["PSA"]`. Empty = all. |
+| `graders` | e.g. `["PSA", "CGC 10"]`: all PSA grades, plus CGC only for 10s. Empty = all. |
 | `min_grade` | e.g. `9`. `null` = any. |
 | `languages` | e.g. `["English"]` or `["Japanese"]`. Empty = all. |
 | `pokemon` | Which Pokémon to watch, e.g. `["rayquaza", "charizard", "umbreon"]`. Newly added ones start with only the last 30 min of listings. |

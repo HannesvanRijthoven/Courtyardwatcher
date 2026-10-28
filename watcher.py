@@ -238,9 +238,13 @@ def passes_filters(l: Listing, cfg: dict, needle: str = "") -> bool:
         return False
     if cfg.get("max_price_usd") and l.price_usd > cfg["max_price_usd"]:
         return False
-    graders = [g.upper() for g in cfg.get("graders") or []]
-    if graders and l.grader.upper() not in graders:
-        return False
+    # "PSA" = any PSA grade; "CGC 10" = CGC, but only 10s (incl. Pristine)
+    graders = [" ".join(g.upper().split()) for g in cfg.get("graders") or []]
+    if graders:
+        agency = l.grader.upper().strip()
+        is_ten = grade_number(l.grade) == 10
+        if agency not in graders and not (is_ten and f"{agency} 10" in graders):
+            return False
     if cfg.get("min_grade") is not None:
         g = grade_number(l.grade)
         if g is None or g < float(cfg["min_grade"]):
