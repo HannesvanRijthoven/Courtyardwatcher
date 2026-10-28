@@ -31,11 +31,25 @@ jobs:
           key: watcher-state-${{ github.run_id }}
           restore-keys: watcher-state-
 
+      - name: Restore Marktplaats state
+        uses: actions/cache/restore@v4
+        with:
+          path: mp_state.json
+          key: mp-state-${{ github.run_id }}
+          restore-keys: mp-state-
+
       - name: Check Courtyard
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: python watcher.py
+
+      - name: Check Marktplaats ETBs
+        if: always()   # runs even if the Courtyard check failed
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python marktplaats_watcher.py
 
       - name: Save state
         if: always()
@@ -43,3 +57,10 @@ jobs:
         with:
           path: state.json
           key: watcher-state-${{ github.run_id }}
+
+      - name: Save Marktplaats state
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: mp_state.json
+          key: mp-state-${{ github.run_id }}

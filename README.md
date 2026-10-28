@@ -82,7 +82,34 @@ Edit `config.json` on GitHub (click it → pencil icon → commit). The main set
 
 ---
 
-## Good to know
+## Marktplaats ETB deals
+
+The same run also checks Marktplaats for **sealed English Elite Trainer Boxes**. For every new ad it:
+
+1. works out which set it is ("151", "Evolving Skies", "30th Celebration", Pokémon Center version, Koraidon/Miraidon, ...),
+2. looks up that box's sealed price on PriceCharting (refreshed daily, converted to euros at the ECB rate),
+3. sends an alert (📦) when the ad is at least 30% cheaper.
+
+It skips ads it can't trust: cases of 10, acrylic covers, empty or opened boxes, pre-orders, "gezocht"
+and trade ads, lots and bundles, graded promo cards, non-English boxes, "Bieden" ads without a price,
+and titles that name no set (or several). If the ad doesn't say which version (e.g. Evolving Skies
+without Jolteon/Vaporeon), it's compared with the cheapest version, so an alert is a deal either way.
+
+The very first run only remembers the ads that are already up, so you won't get a flood of alerts.
+
+Settings live in the `"marktplaats"` section of `config.json`:
+
+| Setting | What it does |
+|---|---|
+| `enabled` | `false` turns the Marktplaats check off. |
+| `min_discount_pct` | How far under PriceCharting it must be. PriceCharting is US prices, so EU prices often sit a bit above it — start high. |
+| `min_price_eur` / `max_price_eur` | Price range. The minimum filters out €1 placeholder prices. |
+| `include_bids` | `true` also alerts on "Bieden vanaf €X" ads. |
+| `search_terms` | What to search Marktplaats for. |
+
+A brand-new set that isn't on PriceCharting yet is skipped until PriceCharting lists it.
+
+
 
 - **Timing:** GitHub sometimes starts scheduled runs a few minutes late, so treat it as
   "within ~5–10 minutes", not instant.

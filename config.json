@@ -22,5 +22,16 @@
   "languages": [],
 
   "use_pricecharting": true,
-  "first_run_lookback_minutes": 30
+  "first_run_lookback_minutes": 30,
+
+  "marktplaats": {
+    "_help": "Sealed English Elite Trainer Boxes on Marktplaats, compared with the PriceCharting sealed price (converted to euros).",
+    "enabled": true,
+    "min_discount_pct": 30,
+    "min_price_eur": 20,
+    "max_price_eur": null,
+    "_include_bids_help": "true = also alert on 'Bieden vanaf' ads that state a minimum bid",
+    "include_bids": true,
+    "search_terms": ["elite trainer box", "etb"]
+  }
 }
