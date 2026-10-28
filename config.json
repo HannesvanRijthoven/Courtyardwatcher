@@ -15,7 +15,7 @@
   "max_price_usd": null,
 
   "_graders_help": "e.g. [\"PSA\", \"CGC\"]. Empty list = all graders.",
-  "graders": [],
+  "graders": ["PSA"],
   "_min_grade_help": "e.g. 9 to only see grade 9 and up. null = any grade.",
   "min_grade": null,
   "_languages_help": "e.g. [\"English\"] or [\"Japanese\"]. Empty list = all.",
